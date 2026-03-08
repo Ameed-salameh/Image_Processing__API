@@ -6,7 +6,6 @@ const router = (0, express_1.Router)();
 router.get('/api/images', async (req, res) => {
     try {
         const { filename, width, height } = req.query;
-        // Validate required parameters
         if (!filename) {
             res.status(400).json({ error: 'Filename parameter is required' });
             return;
@@ -17,7 +16,6 @@ router.get('/api/images', async (req, res) => {
                 .json({ error: 'Width and height parameters are required' });
             return;
         }
-        // Parse and validate width and height
         const parsedWidth = parseInt(width, 10);
         const parsedHeight = parseInt(height, 10);
         if (Number.isNaN(parsedWidth) || Number.isNaN(parsedHeight)) {
@@ -32,7 +30,7 @@ router.get('/api/images', async (req, res) => {
                 .json({ error: 'Width and height must be positive numbers' });
             return;
         }
-        // Resize image
+        
         const options = {
             filename: filename,
             width: parsedWidth,
@@ -48,17 +46,14 @@ router.get('/api/images', async (req, res) => {
             }
             return;
         }
-        // Send the resized image
         res.sendFile(result.outputPath, (err) => {
             if (err) {
-                // eslint-disable-next-line no-console
                 console.error('Error sending file:', err);
                 res.status(500).json({ error: 'Internal server error' });
             }
         });
     }
     catch (error) {
-        // eslint-disable-next-line no-console
         console.error('Unexpected error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }

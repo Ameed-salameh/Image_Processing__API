@@ -117,21 +117,17 @@ describe('Image Processing Utility', () => {
       }`;
       const outputPath = path.join(testOutputDir, outputFilename);
 
-      // Ensure source image exists for a true success scenario
       expect(fs.existsSync(testImagePath)).toBeTrue();
 
-      // Remove any existing thumbnail so we can verify creation
       if (fs.existsSync(outputPath)) {
         fs.unlinkSync(outputPath);
       }
 
-      // First call should create the resized image
       const result1 = await resizeImage(options);
       expect(result1.success).toBe(true);
       expect(result1.outputPath).toBe(outputPath);
       expect(fs.existsSync(outputPath)).toBeTrue();
 
-      // Second call should use the cached image without recreating it
       const statsBefore = fs.statSync(outputPath);
       const result2 = await resizeImage(options);
       const statsAfter = fs.statSync(outputPath);

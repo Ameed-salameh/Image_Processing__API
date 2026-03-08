@@ -9,7 +9,6 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const resizeImage = async (options) => {
     const { filename, width, height } = options;
-    // Validate input parameters
     if (!filename) {
         return {
             success: false,
@@ -40,25 +39,21 @@ const resizeImage = async (options) => {
         const parsed = path_1.default.parse(filename);
         const outputFilename = `${parsed.name}_${width}_${height}${parsed.ext}`;
         const outputPath = path_1.default.join(outputDir, outputFilename);
-        // Check if input file exists
         if (!fs_1.default.existsSync(inputPath)) {
             return {
                 success: false,
                 error: 'Source image file not found',
             };
         }
-        // Caching: if resized image already exists, reuse it
         if (fs_1.default.existsSync(outputPath)) {
             return {
                 success: true,
                 outputPath,
             };
         }
-        // Ensure output directory exists
         if (!fs_1.default.existsSync(outputDir)) {
             fs_1.default.mkdirSync(outputDir, { recursive: true });
         }
-        // Resize and save the image
         await (0, sharp_1.default)(inputPath).resize(width, height).toFile(outputPath);
         return {
             success: true,

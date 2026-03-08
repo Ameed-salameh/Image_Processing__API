@@ -9,7 +9,6 @@ router.get(
     try {
       const { filename, width, height } = req.query;
 
-      // Validate required parameters
       if (!filename) {
         res.status(400).json({ error: 'Filename parameter is required' });
         return;
@@ -22,7 +21,6 @@ router.get(
         return;
       }
 
-      // Parse and validate width and height
       const parsedWidth = parseInt(width as string, 10);
       const parsedHeight = parseInt(height as string, 10);
 
@@ -40,7 +38,6 @@ router.get(
         return;
       }
 
-      // Resize image
       const options: ResizeOptions = {
         filename: filename as string,
         width: parsedWidth,
@@ -58,16 +55,13 @@ router.get(
         return;
       }
 
-      // Send the resized image
       res.sendFile(result.outputPath!, (err) => {
         if (err) {
-          // eslint-disable-next-line no-console
           console.error('Error sending file:', err);
           res.status(500).json({ error: 'Internal server error' });
         }
       });
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error('Unexpected error:', error);
       res.status(500).json({ error: 'Internal server error' });
     }

@@ -19,7 +19,6 @@ export const resizeImage = async (
 ): Promise<ResizeResult> => {
   const { filename, width, height } = options;
 
-  // Validate input parameters
   if (!filename) {
     return {
       success: false,
@@ -55,7 +54,6 @@ export const resizeImage = async (
     const outputFilename = `${parsed.name}_${width}_${height}${parsed.ext}`;
     const outputPath = path.join(outputDir, outputFilename);
 
-    // Check if input file exists
     if (!fs.existsSync(inputPath)) {
       return {
         success: false,
@@ -63,7 +61,6 @@ export const resizeImage = async (
       };
     }
 
-    // Caching: if resized image already exists, reuse it
     if (fs.existsSync(outputPath)) {
       return {
         success: true,
@@ -71,12 +68,10 @@ export const resizeImage = async (
       };
     }
 
-    // Ensure output directory exists
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    // Resize and save the image
     await sharp(inputPath).resize(width, height).toFile(outputPath);
 
     return {
