@@ -62,4 +62,3 @@ router.get('/api/images', async (req, res) => {
     }
 });
 exports.default = router;
-//# sourceMappingURL=images.js.map

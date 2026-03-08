@@ -73,4 +73,3 @@ const resizeImage = async (options) => {
     }
 };
 exports.resizeImage = resizeImage;
-//# sourceMappingURL=resizeImage.js.map

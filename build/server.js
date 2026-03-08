@@ -28,4 +28,3 @@ app.listen(PORT, () => {
     console.log(`Access the API at: http://localhost:${PORT}`);
 });
 exports.default = app;
-//# sourceMappingURL=server.js.map
