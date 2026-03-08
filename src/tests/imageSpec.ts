@@ -3,13 +3,18 @@ import fs from 'fs';
 import path from 'path';
 
 describe('Image Processing Utility', () => {
-  const testImagePath = path.join(process.cwd(), 'assets', 'full', 'test.jpg');
-  const testOutputDir = path.join(process.cwd(), 'assets', 'thumb');
+  const testImagePath = path.join(
+    process.cwd(),
+    'images',
+    'full',
+    'example.jpg'
+  );
+  const testOutputDir = path.join(process.cwd(), 'images', 'thumb');
 
   beforeAll(() => {
     // Create test directories if they don't exist
-    if (!fs.existsSync(path.join(process.cwd(), 'assets', 'full'))) {
-      fs.mkdirSync(path.join(process.cwd(), 'assets', 'full'), {
+    if (!fs.existsSync(path.join(process.cwd(), 'images', 'full'))) {
+      fs.mkdirSync(path.join(process.cwd(), 'images', 'full'), {
         recursive: true,
       });
     }
@@ -97,37 +102,44 @@ describe('Image Processing Utility', () => {
       expect(result.error).toBe('Source image file not found');
     });
 
-    it('should return success when valid parameters are provided', async () => {
-      // Test the function with valid parameters to ensure it doesn't crash
+    it('should successfully resize an existing image and reuse the cached version', async () => {
+      const filename = path.basename(testImagePath);
+      const width = 200;
+      const height = 200;
+
       const options: ResizeOptions = {
-        filename: 'test.jpg',
-        width: 50,
-        height: 50,
+        filename,
+        width,
+        height,
       };
 
-      // First test with non-existent file to ensure error handling works
+      const outputFilename = `${path.parse(filename).name}_${width}_${height}${
+        path.parse(filename).ext
+      }`;
+      const outputPath = path.join(testOutputDir, outputFilename);
+
+      // Ensure source image exists for a true success scenario
+      expect(fs.existsSync(testImagePath)).toBeTrue();
+
+      // Remove any existing thumbnail so we can verify creation
+      if (fs.existsSync(outputPath)) {
+        fs.unlinkSync(outputPath);
+      }
+
+      // First call should create the resized image
       const result1 = await resizeImage(options);
-      expect(result1.success).toBe(false);
-      expect(result1.error).toBe('Source image file not found');
+      expect(result1.success).toBe(true);
+      expect(result1.outputPath).toBe(outputPath);
+      expect(fs.existsSync(outputPath)).toBeTrue();
 
-      // Create a simple test file (even if not a valid image, it tests the path logic)
-      fs.writeFileSync(testImagePath, 'test content');
-
+      // Second call should use the cached image without recreating it
+      const statsBefore = fs.statSync(outputPath);
       const result2 = await resizeImage(options);
+      const statsAfter = fs.statSync(outputPath);
 
-      // Even if the image processing fails due to invalid image format,
-      // we can test that the function handles it gracefully
-      expect(result2).toBeDefined();
-      expect(typeof result2.success).toBe('boolean');
-      expect(typeof result2.error).toBe('string');
-
-      // Clean up test files
-      if (fs.existsSync(testImagePath)) {
-        fs.unlinkSync(testImagePath);
-      }
-      if (result2.outputPath && fs.existsSync(result2.outputPath)) {
-        fs.unlinkSync(result2.outputPath);
-      }
+      expect(result2.success).toBe(true);
+      expect(result2.outputPath).toBe(outputPath);
+      expect(statsAfter.mtimeMs).toBe(statsBefore.mtimeMs);
     });
   });
 });

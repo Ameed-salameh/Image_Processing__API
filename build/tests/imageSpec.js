@@ -7,12 +7,12 @@ const resizeImage_1 = require("../utilities/resizeImage");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 describe('Image Processing Utility', () => {
-    const testImagePath = path_1.default.join(process.cwd(), 'assets', 'full', 'test.jpg');
-    const testOutputDir = path_1.default.join(process.cwd(), 'assets', 'thumb');
+    const testImagePath = path_1.default.join(process.cwd(), 'images', 'full', 'example.jpg');
+    const testOutputDir = path_1.default.join(process.cwd(), 'images', 'thumb');
     beforeAll(() => {
         // Create test directories if they don't exist
-        if (!fs_1.default.existsSync(path_1.default.join(process.cwd(), 'assets', 'full'))) {
-            fs_1.default.mkdirSync(path_1.default.join(process.cwd(), 'assets', 'full'), {
+        if (!fs_1.default.existsSync(path_1.default.join(process.cwd(), 'images', 'full'))) {
+            fs_1.default.mkdirSync(path_1.default.join(process.cwd(), 'images', 'full'), {
                 recursive: true,
             });
         }
@@ -81,32 +81,35 @@ describe('Image Processing Utility', () => {
             expect(result.success).toBe(false);
             expect(result.error).toBe('Source image file not found');
         });
-        it('should return success when valid parameters are provided', async () => {
-            // Test the function with valid parameters to ensure it doesn't crash
+        it('should successfully resize an existing image and reuse the cached version', async () => {
+            const filename = path_1.default.basename(testImagePath);
+            const width = 200;
+            const height = 200;
             const options = {
-                filename: 'test.jpg',
-                width: 50,
-                height: 50,
+                filename,
+                width,
+                height,
             };
-            // First test with non-existent file to ensure error handling works
+            const outputFilename = `${path_1.default.parse(filename).name}_${width}_${height}${path_1.default.parse(filename).ext}`;
+            const outputPath = path_1.default.join(testOutputDir, outputFilename);
+            // Ensure source image exists for a true success scenario
+            expect(fs_1.default.existsSync(testImagePath)).toBeTrue();
+            // Remove any existing thumbnail so we can verify creation
+            if (fs_1.default.existsSync(outputPath)) {
+                fs_1.default.unlinkSync(outputPath);
+            }
+            // First call should create the resized image
             const result1 = await (0, resizeImage_1.resizeImage)(options);
-            expect(result1.success).toBe(false);
-            expect(result1.error).toBe('Source image file not found');
-            // Create a simple test file (even if not a valid image, it tests the path logic)
-            fs_1.default.writeFileSync(testImagePath, 'test content');
+            expect(result1.success).toBe(true);
+            expect(result1.outputPath).toBe(outputPath);
+            expect(fs_1.default.existsSync(outputPath)).toBeTrue();
+            // Second call should use the cached image without recreating it
+            const statsBefore = fs_1.default.statSync(outputPath);
             const result2 = await (0, resizeImage_1.resizeImage)(options);
-            // Even if the image processing fails due to invalid image format,
-            // we can test that the function handles it gracefully
-            expect(result2).toBeDefined();
-            expect(typeof result2.success).toBe('boolean');
-            expect(typeof result2.error).toBe('string');
-            // Clean up test files
-            if (fs_1.default.existsSync(testImagePath)) {
-                fs_1.default.unlinkSync(testImagePath);
-            }
-            if (result2.outputPath && fs_1.default.existsSync(result2.outputPath)) {
-                fs_1.default.unlinkSync(result2.outputPath);
-            }
+            const statsAfter = fs_1.default.statSync(outputPath);
+            expect(result2.success).toBe(true);
+            expect(result2.outputPath).toBe(outputPath);
+            expect(statsAfter.mtimeMs).toBe(statsBefore.mtimeMs);
         });
     });
 });

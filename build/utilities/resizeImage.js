@@ -36,8 +36,8 @@ const resizeImage = async (options) => {
     }
     try {
         // Define paths
-        const inputPath = path_1.default.join(process.cwd(), 'assets', 'full', filename);
-        const outputDir = path_1.default.join(process.cwd(), 'assets', 'thumb');
+        const inputPath = path_1.default.join(process.cwd(), 'images', 'full', filename);
+        const outputDir = path_1.default.join(process.cwd(), 'images', 'thumb');
         const outputFilename = `${path_1.default.parse(filename).name}_${width}_${height}${path_1.default.parse(filename).ext}`;
         const outputPath = path_1.default.join(outputDir, outputFilename);
         // Check if input file exists

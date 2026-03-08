@@ -1,4 +1,6 @@
 import request from 'supertest';
+import fs from 'fs';
+import path from 'path';
 import app from '../server';
 
 describe('Image API Endpoints', () => {
@@ -131,15 +133,42 @@ describe('Image API Endpoints', () => {
       expect(response.body.error).toBe('Source image file not found');
     });
 
-    it('should return 200 when all parameters are valid but image does not exist (expected behavior)', async () => {
+    it('should return 404 when all parameters are valid but the image does not exist', async () => {
       const response = await request(app).get(
         '/api/images?filename=test.jpg&width=100&height=100'
       );
 
-      // This will return 404 since the image doesn't exist, which is correct behavior
       expect(response.status).toBe(404);
       expect(response.body).toBeDefined();
       expect(response.body.error).toBeDefined();
+    });
+
+    it('should return 200 and create a cached thumbnail when valid parameters and source image exist', async () => {
+      const filename = 'example.jpg';
+      const width = 200;
+      const height = 200;
+
+      const thumbDir = path.join(process.cwd(), 'images', 'thumb');
+      const thumbFilename = `${path.parse(filename).name}_${width}_${height}${
+        path.parse(filename).ext
+      }`;
+      const thumbPath = path.join(thumbDir, thumbFilename);
+
+      // Ensure source image exists
+      const sourcePath = path.join(process.cwd(), 'images', 'full', filename);
+      expect(fs.existsSync(sourcePath)).toBeTrue();
+
+      // Delete existing thumbnail if present so we can verify creation
+      if (fs.existsSync(thumbPath)) {
+        fs.unlinkSync(thumbPath);
+      }
+
+      const response = await request(app).get(
+        `/api/images?filename=${filename}&width=${width}&height=${height}`
+      );
+
+      expect(response.status).toBe(200);
+      expect(fs.existsSync(thumbPath)).toBeTrue();
     });
   });
 });

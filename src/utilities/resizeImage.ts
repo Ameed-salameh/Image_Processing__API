@@ -50,8 +50,8 @@ export const resizeImage = async (
 
   try {
     // Define paths
-    const inputPath = path.join(process.cwd(), 'assets', 'full', filename);
-    const outputDir = path.join(process.cwd(), 'assets', 'thumb');
+    const inputPath = path.join(process.cwd(), 'images', 'full', filename);
+    const outputDir = path.join(process.cwd(), 'images', 'thumb');
     const outputFilename = `${path.parse(filename).name}_${width}_${height}${path.parse(filename).ext}`;
     const outputPath = path.join(outputDir, outputFilename);
 
