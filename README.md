@@ -103,26 +103,77 @@ If the same request is made again with the same parameters, the server will dete
 
 ## Error Handling
 
-The /api/images endpoint checks the input parameters and returns appropriate error responses.
+The `/api/images` endpoint checks the input parameters and returns appropriate error responses in **JSON** format, so you can see the messages directly in the browser or in a REST client.
 
 ### 400 Bad Request
 
-This happens when:
+Returned when the request is structurally wrong. Examples you can try:
 
-- filename is missing
-- width or height are missing
-- width or height are not numbers
-- width or height are zero or negative
+- **Missing filename**
+
+  ```text
+  http://localhost:3000/api/images?width=200&height=200
+  ```
+
+- **Missing width**
+
+  ```text
+  http://localhost:3000/api/images?filename=example.jpg&height=200
+  ```
+
+- **Missing height**
+
+  ```text
+  http://localhost:3000/api/images?filename=example.jpg&width=200
+  ```
+
+- **Invalid (non‑numeric) width or height**
+
+  ```text
+  http://localhost:3000/api/images?filename=example.jpg&width=800etr&height=700vbn
+  ```
+
+  ```text
+  http://localhost:3000/api/images?filename=example.jpg&width=200&height=a
+  ```
+
+- **Zero or negative width/height**
+
+  ```text
+  http://localhost:3000/api/images?filename=example.jpg&width=0&height=200
+  ```
+
+  ```text
+  http://localhost:3000/api/images?filename=example.jpg&width=200&height=-1
+  ```
+
+For all of the above, the API returns **HTTP 400** and a JSON body such as:
+
+```json
+{ "error": "Width and height must be positive numbers" }
+```
 
 ### 404 Not Found
 
-Returned when the requested image does not exist in the images/full folder.
+Returned when the requested image file does not exist in the `images/full` folder. Example:
+
+```text
+http://localhost:3000/api/images?filename=fjord123.jpg&width=200&height=200
+```
+
+This responds with **HTTP 404** and:
+
+```json
+{ "error": "Source image file not found" }
+```
 
 ### 500 Internal Server Error
 
-Returned if something unexpected happens while processing the image.
+Returned if something unexpected happens while processing or sending the image. In that case the API returns **HTTP 500** and:
 
-All error responses are returned as JSON with an error message.
+```json
+{ "error": "Internal server error" }
+```
 
 ## Caching Behavior
 

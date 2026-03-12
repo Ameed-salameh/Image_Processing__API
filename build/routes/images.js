@@ -30,7 +30,6 @@ router.get('/api/images', async (req, res) => {
                 .json({ error: 'Width and height must be positive numbers' });
             return;
         }
-        
         const options = {
             filename: filename,
             width: parsedWidth,
