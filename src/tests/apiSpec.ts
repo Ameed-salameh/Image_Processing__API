@@ -154,7 +154,6 @@ describe('Image API Endpoints', () => {
       }`;
       const thumbPath = path.join(thumbDir, thumbFilename);
 
-      // Ensure source image exists
       const sourcePath = path.join(
         process.cwd(),
         'images',
@@ -163,7 +162,6 @@ describe('Image API Endpoints', () => {
       );
       expect(fs.existsSync(sourcePath)).toBeTrue();
 
-      // Delete existing thumbnail if present so we can verify creation
       if (fs.existsSync(thumbPath)) {
         fs.unlinkSync(thumbPath);
       }
